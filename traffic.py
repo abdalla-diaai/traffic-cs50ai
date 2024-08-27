@@ -10,6 +10,8 @@ EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
+SMALL_NUM_CATEGORIES = 3
+
 TEST_SIZE = 0.4
 
 def main():
@@ -26,7 +28,6 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(
         np.array(images), np.array(labels), test_size=TEST_SIZE
     )
-    print("no errors")
     # Get a compiled neural network
     model = get_model()
 
@@ -36,7 +37,7 @@ def main():
     # Evaluate neural network performance
     model.evaluate(x_test,  y_test, verbose=2)
 
-    # Save model to file
+    # Save model to file, use .keras as extension
     if len(sys.argv) == 3:
         filename = sys.argv[2]
         model.save(filename)
@@ -79,7 +80,37 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    # Create a convolutional neural network
+    model = tf.keras.models.Sequential([
+        # pass input shape seperately not within first layer
+        tf.keras.layers.Input(shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
+        # Convolutional layer. Learn 32 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu"
+        ),
+
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(3, 3)),
+
+        # Flatten units
+        tf.keras.layers.Flatten(),
+
+        # Add a hidden layer with dropout
+        tf.keras.layers.Dense(1000, activation="relu"),
+        tf.keras.layers.Dropout(0.4),
+
+        # Add an output layer with output units for all 3(small dataset) or 43 (complete dataset) signs
+        # tf.keras.layers.Dense(SMALL_NUM_CATEGORIES, activation="softmax")
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+    ])
+
+    # Train neural network
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
 
 
 if __name__ == "__main__":
