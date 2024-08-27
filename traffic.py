@@ -12,7 +12,6 @@ IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
 TEST_SIZE = 0.4
 
-
 def main():
 
     # Check command-line arguments
@@ -27,7 +26,7 @@ def main():
     x_train, x_test, y_train, y_test = train_test_split(
         np.array(images), np.array(labels), test_size=TEST_SIZE
     )
-
+    print("no errors")
     # Get a compiled neural network
     model = get_model()
 
@@ -58,8 +57,21 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
 
+    images = []
+    labels = []
+    for dir in os.listdir(data_dir):
+        # build the path to the folder
+        folder_path = os.path.join(data_dir, dir)
+        if os.path.isdir(folder_path):
+            for file_name in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file_name)
+                img = cv2.imread(file_path)
+                if img is not None:
+                    res = cv2.resize(img,(IMG_WIDTH, IMG_HEIGHT))
+                    images.append(res)
+                    labels.append(dir)
+    return (images, labels)
 
 def get_model():
     """
