@@ -11,8 +11,8 @@ IMG_WIDTH = 30
 IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
 SMALL_NUM_CATEGORIES = 3
-
 TEST_SIZE = 0.4
+
 
 def main():
 
@@ -35,7 +35,7 @@ def main():
     model.fit(x_train, y_train, epochs=EPOCHS)
 
     # Evaluate neural network performance
-    model.evaluate(x_test,  y_test, verbose=2)
+    model.evaluate(x_test, y_test, verbose=2)
 
     # Save model to file, use .keras as extension
     if len(sys.argv) == 3:
@@ -69,10 +69,11 @@ def load_data(data_dir):
                 file_path = os.path.join(folder_path, file_name)
                 img = cv2.imread(file_path)
                 if img is not None:
-                    res = cv2.resize(img,(IMG_WIDTH, IMG_HEIGHT))
+                    res = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
                     images.append(res)
                     labels.append(dir)
     return (images, labels)
+
 
 def get_model():
     """
@@ -81,34 +82,28 @@ def get_model():
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
     # Create a convolutional neural network
-    model = tf.keras.models.Sequential([
-        # pass input shape seperately not within first layer
-        tf.keras.layers.Input(shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
-        # Convolutional layer. Learn 32 filters using a 3x3 kernel
-        tf.keras.layers.Conv2D(
-            32, (3, 3), activation="relu"
-        ),
-
-        # Max-pooling layer, using 2x2 pool size
-        tf.keras.layers.MaxPooling2D(pool_size=(3, 3)),
-
-        # Flatten units
-        tf.keras.layers.Flatten(),
-
-        # Add a hidden layer with dropout
-        tf.keras.layers.Dense(1000, activation="relu"),
-        tf.keras.layers.Dropout(0.4),
-
-        # Add an output layer with output units for all 3(small dataset) or 43 (complete dataset) signs
-        # tf.keras.layers.Dense(SMALL_NUM_CATEGORIES, activation="softmax")
-        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
-    ])
+    model = tf.keras.models.Sequential(
+        [
+            # pass input shape seperately not within first layer
+            tf.keras.layers.Input(shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
+            # Convolutional layer. Learn 32 filters using a 3x3 kernel
+            tf.keras.layers.Conv2D(32, (3, 3), activation="relu"),
+            # Max-pooling layer, using 2x2 pool size
+            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+            # Flatten units
+            tf.keras.layers.Flatten(),
+            # Add a hidden layer with dropout
+            tf.keras.layers.Dense(500, activation="relu"),
+            tf.keras.layers.Dropout(0.5),
+            # Add an output layer with output units for all 3(small dataset) or 43 (complete dataset) signs
+            # tf.keras.layers.Dense(SMALL_NUM_CATEGORIES, activation="softmax")
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax"),
+        ]
+    )
 
     # Train neural network
     model.compile(
-        optimizer="adam",
-        loss="categorical_crossentropy",
-        metrics=["accuracy"]
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
     )
     return model
 
